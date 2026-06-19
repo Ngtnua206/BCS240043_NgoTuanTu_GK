@@ -1,0 +1,103 @@
+@model IEnumerable<Room_BCS240043>
+@{
+    ViewData["Title"] = "Danh sách phòng";
+}
+
+<h1>Danh sách phòng</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Thêm phòng mới</a>
+    <a asp-action="Index" asp-controller="RoomTypes" class="btn btn-secondary">Quản lý loại phòng</a>
+</p>
+
+<form asp-action="Index" method="get" class="row g-2 mb-3">
+    <div class="col-md-3">
+        <input type="text" name="searchString" class="form-control" placeholder="Tìm theo tên phòng..." value="@ViewData["SearchString"]" />
+    </div>
+    <div class="col-md-2">
+        <select name="roomTypeId" class="form-control" asp-items="@(new SelectList(ViewData["RoomTypes"] as IEnumerable<RoomType_BCS240043>, "Id", "Name", ViewData["RoomTypeId"]))">
+            <option value="">-- Loại phòng --</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <select name="isAvailable" class="form-control">
+            <option value="">-- Trạng thái --</option>
+            <option value="true" selected="@(ViewData["IsAvailable"]?.ToString() == "True")">Còn phòng</option>
+            <option value="false" selected="@(ViewData["IsAvailable"]?.ToString() == "False")">Hết phòng</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <input type="number" name="maxPrice" class="form-control" placeholder="Giá tối đa" value="@ViewData["MaxPrice"]" />
+    </div>
+    <div class="col-md-1">
+        <button type="submit" class="btn btn-primary w-100">Tìm</button>
+    </div>
+    <div class="col-md-2">
+        <select name="sortOrder" class="form-control" onchange="this.form.submit()">
+            <option value="">-- Sắp xếp --</option>
+            <option value="price_asc" selected="@(ViewData["SortOrder"]?.ToString() == "price_asc")">Giá tăng dần</option>
+            <option value="price_desc" selected="@(ViewData["SortOrder"]?.ToString() == "price_desc")">Giá giảm dần</option>
+            <option value="area_desc" selected="@(ViewData["SortOrder"]?.ToString() == "area_desc")">Diện tích giảm dần</option>
+        </select>
+    </div>
+</form>
+
+@if (ViewBag.NoResults == true)
+{
+    <div class="alert alert-info">Không tìm thấy phòng nào phù hợp.</div>
+}
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Tên phòng</th>
+            <th>Loại phòng</th>
+            <th>Giá</th>
+            <th>Diện tích</th>
+            <th>Giá/m²</th>
+            <th>Trạng thái</th>
+            <th>Ảnh</th>
+            <th>Thao tác</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.RoomType?.Name</td>
+                <td>@item.Price.ToString("N0")</td>
+                <td>@item.Area.ToString("N2") m²</td>
+                <td>@((item.Price / item.Area).ToString("N2"))</td>
+                <td>
+                    @if (item.IsAvailable)
+                    {
+                        <span class="badge bg-success">Còn phòng</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Hết phòng</span>
+                    }
+                </td>
+                <td>
+                    @{
+                        var thumb = item.RoomImages?.FirstOrDefault(i => i.IsThumbnail);
+                        if (thumb != null)
+                        {
+                            <img src="@thumb.ImageUrl" alt="Thumb" style="width:60px;height:40px;object-fit:cover;" />
+                        }
+                        else
+                        {
+                            <span class="text-muted">Chưa có ảnh</span>
+                        }
+                    }
+                </td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Chi tiết</a>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Sửa</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,40 @@
+@model Room_BCS240043
+@{
+    ViewData["Title"] = "Xóa phòng";
+}
+
+<h1>Xóa phòng</h1>
+
+<h3>Bạn có chắc chắn muốn xóa phòng này?</h3>
+<div>
+    <h4>@Model.Name</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">Loại phòng</dt>
+        <dd class="col-sm-10">@Model.RoomType?.Name</dd>
+
+        <dt class="col-sm-2">Giá</dt>
+        <dd class="col-sm-10">@Model.Price.ToString("N0") VNĐ</dd>
+
+        <dt class="col-sm-2">Diện tích</dt>
+        <dd class="col-sm-10">@Model.Area.ToString("N2") m²</dd>
+
+        <dt class="col-sm-2">Trạng thái</dt>
+        <dd class="col-sm-10">
+            @if (Model.IsAvailable)
+            {
+                <span class="badge bg-success">Còn phòng</span>
+            }
+            else
+            {
+                <span class="badge bg-danger">Hết phòng</span>
+            }
+        </dd>
+    </dl>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger">Xóa</button>
+        <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+    </form>
+</div>

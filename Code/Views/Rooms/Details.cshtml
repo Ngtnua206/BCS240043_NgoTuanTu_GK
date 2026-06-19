@@ -1,0 +1,93 @@
+@model Room_BCS240043
+@{
+    ViewData["Title"] = "Chi tiết phòng";
+}
+
+<h1>Chi tiết phòng</h1>
+
+<div>
+    <h4>@Model.Name</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">Loại phòng</dt>
+        <dd class="col-sm-10">@Model.RoomType?.Name</dd>
+
+        <dt class="col-sm-2">Giá</dt>
+        <dd class="col-sm-10">@Model.Price.ToString("N0") VNĐ</dd>
+
+        <dt class="col-sm-2">Diện tích</dt>
+        <dd class="col-sm-10">@Model.Area.ToString("N2") m²</dd>
+
+        <dt class="col-sm-2">Giá/m²</dt>
+        <dd class="col-sm-10">@((Model.Price / Model.Area).ToString("N2")) VNĐ/m²</dd>
+
+        <dt class="col-sm-2">Trạng thái</dt>
+        <dd class="col-sm-10">
+            @if (Model.IsAvailable)
+            {
+                <span class="badge bg-success">Còn phòng</span>
+            }
+            else
+            {
+                <span class="badge bg-danger">Hết phòng</span>
+            }
+        </dd>
+
+        <dt class="col-sm-2">Mô tả</dt>
+        <dd class="col-sm-10">@Model.Description</dd>
+    </dl>
+</div>
+
+<h4>Ảnh phòng</h4>
+
+@if (ViewBag.NoImages == true)
+{
+    <div class="alert alert-info">Phòng chưa có ảnh.</div>
+}
+
+<div class="row mb-3">
+    @foreach (var img in Model.RoomImages)
+    {
+        <div class="col-md-3 mb-2">
+            <div class="card">
+                <img src="@img.ImageUrl" class="card-img-top" alt="Room image" style="height:150px;object-fit:cover;" />
+                <div class="card-body text-center p-2">
+                    @if (img.IsThumbnail)
+                    {
+                        <span class="badge bg-success">Ảnh đại diện</span>
+                    }
+                    else
+                    {
+                        <form asp-action="SetThumbnail" asp-controller="RoomImages" method="post" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@img.Id" />
+                            <input type="hidden" name="roomId" value="@Model.Id" />
+                            <button type="submit" class="btn btn-sm btn-outline-primary">Đặt làm ảnh đại diện</button>
+                        </form>
+                    }
+                    <form asp-action="Delete" asp-controller="RoomImages" method="post" style="display:inline;" onsubmit="return confirm('Xóa ảnh này?')">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@img.Id" />
+                        <input type="hidden" name="roomId" value="@Model.Id" />
+                        <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<h5>Thêm ảnh mới</h5>
+<form asp-action="Create" asp-controller="RoomImages" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="roomId" value="@Model.Id" />
+    <div class="input-group mb-3">
+        <input type="text" name="imageUrl" class="form-control" placeholder="Nhập đường dẫn ảnh..." required />
+        <button type="submit" class="btn btn-primary">Thêm ảnh</button>
+    </div>
+</form>
+
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Sửa</a>
+    <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+</div>
